@@ -12,43 +12,43 @@
 
   outputs =
     inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = import inputs.systems;
-      imports = [ inputs.gepetto.flakeModule ];
-      perSystem =
-        {
-          lib,
-          pkgs,
-          self',
-          ...
-        }:
-        {
-          packages =
-            let
-              override = {
-                src = lib.fileset.toSource {
-                  root = ./.;
-                  fileset = lib.fileset.unions [
-                    ./cmake-module
-                    ./CMakeLists.txt
-                    ./doc
-                    ./fonts
-                    ./include
-                    ./package.xml
-                    ./plugins
-                    ./pyplugins
-                    ./res
-                    ./src
-                    ./tests
-                  ];
-                };
-              };
-            in
-            {
-              default = self'.packages.py-gepetto-viewer;
-              gepetto-viewer = pkgs.gepetto-viewer.overrideAttrs override;
-              py-gepetto-viewer = pkgs.python3Packages.gepetto-viewer.overrideAttrs override;
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      { lib, self, ... }:
+      {
+        systems = import inputs.systems;
+        imports = [
+          inputs.gepetto.flakeModule
+          { gepetto-pkgs.overlays = [ self.overlays.default ]; }
+        ];
+        flake.overlays.default = _final: prev: {
+          gepetto-viewer = prev.gepetto-viewer.overrideAttrs {
+            src = lib.fileset.toSource {
+              root = ./.;
+              fileset = lib.fileset.unions [
+                ./cmake-module
+                ./CMakeLists.txt
+                ./doc
+                ./fonts
+                ./include
+                ./package.xml
+                ./plugins
+                ./pyplugins
+                ./res
+                ./src
+                ./tests
+              ];
             };
+          };
         };
-    };
+        perSystem =
+          { pkgs, self', ... }:
+          {
+            packages = {
+              default = self'.packages.py-gepetto-viewer;
+              gepetto-viewer = pkgs.gepetto-viewer;
+              py-gepetto-viewer = pkgs.python3Packages.gepetto-viewer;
+            };
+          };
+      }
+    );
 }
