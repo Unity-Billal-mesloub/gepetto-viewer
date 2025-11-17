@@ -592,33 +592,34 @@ bool WindowsManager::addSquareFace(
 bool WindowsManager::setTexture(const std::string& nodeName,
                                 const std::string& filename) {
   NodePtr_t node = getNode(nodeName, true);
-  
+
   LeafNodeFacePtr_t faceNode = dynamic_pointer_cast<LeafNodeFace>(node);
   if (faceNode) {
-      if (faceNode->nbVertices() != 4) {
-          std::ostringstream oss;
-          oss << "Face should have 4 vertices to apply texture. " << nodeName
-              << " has " << faceNode->nbVertices() << ".";
-          throw std::runtime_error(oss.str());
-      }
-      faceNode->setTexture(filename);
-      return true;
+    if (faceNode->nbVertices() != 4) {
+      std::ostringstream oss;
+      oss << "Face should have 4 vertices to apply texture. " << nodeName
+          << " has " << faceNode->nbVertices() << ".";
+      throw std::runtime_error(oss.str());
+    }
+    faceNode->setTexture(filename);
+    return true;
   }
-  
+
   NodeDrawablePtr_t nd = dynamic_pointer_cast<NodeDrawable>(node);
   if (nd) {
-      nd->setTexture(filename);
-      return true;
+    nd->setTexture(filename);
+    return true;
   }
-  
+
   LeafNodeColladaPtr_t lc = dynamic_pointer_cast<LeafNodeCollada>(node);
   if (lc) {
-      lc->setTexture(filename);
-      return true;
+    lc->setTexture(filename);
+    return true;
   }
-  
+
   std::ostringstream oss;
-  oss << "Node \"" << nodeName << "\" is not of type LeafNodeFace, NodeDrawable, or LeafNodeCollada";
+  oss << "Node \"" << nodeName
+      << "\" is not of type LeafNodeFace, NodeDrawable, or LeafNodeCollada";
   throw std::invalid_argument(oss.str());
 }
 
